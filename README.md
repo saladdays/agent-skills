@@ -47,20 +47,25 @@ Claude Code の画面で、以下の2行を実行するだけです。
 
 ```
 /plugin marketplace add saladdays/design-md-generator
-/plugin install generate-design-md@design-md-generator
+/plugin install design-md@design-md-generator
 ```
+
+インストールできたら `/design-md:generate` で DESIGN.md の生成が始まります。
 
 > これは Claude Code の「プラグイン」という仕組みです。1回入れたら、あとはずっと使えます。
 
 ### Cursor で使う
 
-ターミナルで以下を実行して、このリポジトリをダウンロードします。
+ターミナルで以下を実行して、あなたのプロジェクトのフォルダに移動してからダウンロードします。
 
 ```bash
-git clone https://github.com/saladdays/design-md-generator.git
+git clone https://github.com/saladdays/design-md-generator.git /tmp/design-md-generator
+cp -r /tmp/design-md-generator/.cursor/rules/ .cursor/rules/
 ```
 
-Cursor の Composer や Chat で、ダウンロードしたフォルダ内の仕様書（[DESIGN-MD-SPEC.md](./DESIGN-MD-SPEC.md)）と[完成例](#完成例)を渡して、「この仕様でうちのプロダクトの DESIGN.md をつくって」と伝えてみてください。
+これで Cursor のルールとして DESIGN.md のガイドラインが読み込まれます。Composer や Chat で「DESIGN.md をつくりたい」と伝えてみてください。
+
+> `.cursor/rules/` は Cursor の [Project Rules](https://docs.cursor.com/context/rules) の仕組みです。プロジェクトごとにAIの振る舞いをカスタマイズできます。
 
 ### 他のAIツールで使う
 

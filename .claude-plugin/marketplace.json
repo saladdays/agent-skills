@@ -8,10 +8,10 @@
   },
   "plugins": [
     {
-      "name": "generate-design-md",
-      "source": "./plugins/generate-design-md",
+      "name": "design-md",
+      "source": "./plugins/design-md",
       "description": "対話を通じてプロダクトに合った DESIGN.md を生成する",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "saladdays"
       },

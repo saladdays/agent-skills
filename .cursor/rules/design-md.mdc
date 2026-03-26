@@ -1,0 +1,30 @@
+---
+description: DESIGN.md の生成と運用に関するルール。UIを生成・修正する際に自動で参照される。
+globs: ["DESIGN.md", "*.html", "*.tsx", "*.jsx", "*.vue", "*.svelte"]
+alwaysApply: false
+---
+
+# DESIGN.md ルール
+
+## DESIGN.md がプロジェクトにある場合
+
+UIを生成・修正する際は、必ず `DESIGN.md` を読んでその判断基準に従ってください。
+
+- Color Strategy に定義されたトークンのみ使う
+- Typography Scale に定義されたサイズのみ使う
+- Spacing Scale に定義された値のみ使う
+- Component Patterns の Selection Guide に従ってコンポーネントを選ぶ
+- Creative North Star のメタファーに沿った表現を心がける
+- 「自由領域」と書かれた箇所では、トーンの方向性に沿いつつ自由に工夫してよい
+
+## DESIGN.md がまだない場合
+
+ユーザーが「DESIGN.md をつくりたい」と言ったら、以下の手順で対話的に生成してください。
+
+1. プロダクトの概要とターゲットユーザーを聞く
+2. UIの印象（形容詞3つ）や参考サービスを聞く
+3. 既存のサイトURL、Figma、デザインシステムがあれば読み取る
+4. 回答をもとに DESIGN.md を生成する
+
+フォーマットの詳細は `DESIGN-MD-SPEC.md` を参照してください。
+完成例は `plugins/design-md/skills/generate/resources/examples/` にあります。
