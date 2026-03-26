@@ -1,3 +1,7 @@
+---
+description: 対話を通じてプロダクトに合った DESIGN.md を生成する。AIがつくるUIに一貫性を。
+---
+
 # generate-design-md
 
 AIが一貫したUIを生成するための DESIGN.md を、対話形式で作成するスキル。
