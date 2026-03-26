@@ -1,9 +1,10 @@
 {
   "name": "generate-design-md",
   "description": "対話を通じてプロダクトに合った DESIGN.md を生成する。AIがつくるUIに一貫性を。",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "saladdays"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "skills": "./skills/"
 }
