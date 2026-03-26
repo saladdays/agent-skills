@@ -1,5 +1,7 @@
 ---
+name: generate
 description: 対話を通じてプロダクトに合った DESIGN.md を生成する。AIがつくるUIに一貫性を。
+argument-hint: [プロダクトの説明やURL（省略可）]
 ---
 
 # generate-design-md
