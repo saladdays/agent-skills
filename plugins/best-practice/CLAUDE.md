@@ -1,4 +1,4 @@
-# search-best-practice プラグイン開発ルール
+# best-practice プラグイン開発ルール
 
 ## 概要
 

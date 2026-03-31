@@ -20,8 +20,8 @@
       "category": "design"
     },
     {
-      "name": "search-best-practice",
-      "source": "./plugins/search-best-practice",
+      "name": "best-practice",
+      "source": "./plugins/best-practice",
       "description": "世の中のベストプラクティスをWeb検索で調査し、構造化レポートにまとめる",
       "version": "1.0.0",
       "author": {

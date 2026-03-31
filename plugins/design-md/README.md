@@ -56,18 +56,9 @@ Claude Code の画面で、以下の2行を実行するだけです。
 
 ### Cursor で使う
 
-Cursor の Chat で `/add-plugin` を実行し、`design-md` を検索してインストールしてください。
+Cursor のプラグインマーケットプレイスから `design-md` を検索してインストールしてください。
 
-> [Cursor Marketplace](https://cursor.com/marketplace) にも公開予定です。公開後はワンクリックでインストールできるようになります。
-
-Marketplace に公開されるまでは、ターミナルから手動でルールをコピーできます：
-
-```bash
-git clone https://github.com/saladdays/agent-skills.git /tmp/agent-skills
-cp -r /tmp/agent-skills/plugins/design-md/rules/ .cursor/rules/
-```
-
-コピーできたら、Composer や Chat で「DESIGN.md をつくりたい」と伝えてみてください。
+> [Cursor Marketplace](https://cursor.com/marketplace) に公開後はワンクリックでインストールできます。
 
 ### 他のAIツールで使う
 

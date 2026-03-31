@@ -10,10 +10,10 @@
 
 | ファイル | 役割 |
 |---|---|
-| `skills/convene/SKILL.md` | スキル本体。4フェーズのパイプライン定義 |
-| `skills/convene/references/expert-archetypes.md` | 専門家アーキタイプ集（ドメイン→推奨専門家） |
-| `skills/convene/references/deliberation-rules.md` | 議論ルール（収束条件、重み付け、少数意見保護） |
-| `skills/convene/references/output-format.md` | 出力フォーマット |
+| `skills/start/SKILL.md` | スキル本体。4フェーズのパイプライン定義 |
+| `skills/start/references/expert-archetypes.md` | 専門家アーキタイプ集（ドメイン→推奨専門家） |
+| `skills/start/references/deliberation-rules.md` | 議論ルール（収束条件、重み付け、少数意見保護） |
+| `skills/start/references/output-format.md` | 出力フォーマット |
 
 ## 設計思想
 
