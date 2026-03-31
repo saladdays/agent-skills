@@ -20,6 +20,78 @@ plugins/
 - プラグインを追加したら `marketplace.json`（`.claude-plugin/` と `.cursor-plugin/` の両方）に登録する
 - コミットメッセージ: `type(scope): description`（scope はプラグイン名）
 
+## プラグインの命名規則
+
+### プラグイン名（ディレクトリ名）
+
+- **ケバブケース**（小文字 + ハイフン区切り）: `design-md`, `search-best-practice`, `roundtable`
+- ユーザーがインストール時に指定する名前になる（`/plugin install <プラグイン名>@saladdays-skills`）
+- 短く、何をするか想像できる名前にする
+
+### スキル名（skills/ 配下のディレクトリ名）
+
+- **動詞または動作を表す単語**: `generate`, `search`, `convene`
+- プラグイン名とは別に、スキルの呼び出し名になる（`/design-md:generate`）
+- 1プラグインに複数スキルを持てるが、メインのスキルは1つに絞る
+
+### 呼び出し形式
+
+`/<プラグイン名>:<スキル名>` — 例: `/roundtable:convene [議題]`
+
+## プラグインの作成手順
+
+### 1. ディレクトリ構造をつくる
+
+```
+plugins/<plugin-name>/
+├── .claude-plugin/plugin.json   — Claude Code 向けメタデータ
+├── .cursor-plugin/plugin.json   — Cursor 向けメタデータ
+├── CLAUDE.md                    — 開発ルール（設計思想、テスト方法等）
+├── README.md                    — 利用者向けドキュメント（ストアページ）
+└── skills/
+    └── <skill-name>/
+        ├── SKILL.md             — スキル本体（YAML frontmatter + 実行手順）
+        └── references/          — 補足資料（必要に応じて）
+```
+
+### 2. plugin.json を書く
+
+```json
+{
+  "name": "<plugin-name>",
+  "description": "1文の説明",
+  "version": "1.0.0",
+  "author": { "name": "saladdays" },
+  "license": "MIT",
+  "skills": "./skills/"
+}
+```
+
+`.claude-plugin/plugin.json` と `.cursor-plugin/plugin.json` の両方に配置する（内容は同一で可）。
+
+### 3. SKILL.md を書く
+
+```yaml
+---
+name: <skill-name>
+description: >
+  スキルの説明。どんなときに使うか。
+argument-hint: "[引数の説明]"
+---
+```
+
+frontmatter の後にスキルの実行手順を Markdown で記述する。
+
+### 4. マーケットプレイスに登録する
+
+`.claude-plugin/marketplace.json` と `.cursor-plugin/marketplace.json` の `plugins` 配列にエントリを追加する。
+
+### 5. ドキュメントを書く
+
+- `CLAUDE.md` — 開発者向け（設計思想、重要ファイル、テスト方法）
+- `README.md` — 利用者向け（後述の「プラグイン README の書き方」に従う）
+- ルートの `CLAUDE.md` のプラグイン一覧にも追加する
+
 ## プラグイン README の書き方
 
 各プラグインの README.md はマーケットプレイスのストアページ本文に相当する。
