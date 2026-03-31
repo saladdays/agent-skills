@@ -1,0 +1,9 @@
+{
+  "name": "search-best-practice",
+  "description": "世の中のベストプラクティスをWeb検索で調査し、鮮度・信頼性・多角的視点を考慮して構造化レポートにまとめる。",
+  "version": "1.0.0",
+  "author": {
+    "name": "saladdays"
+  },
+  "license": "MIT"
+}

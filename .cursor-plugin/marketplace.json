@@ -8,6 +8,11 @@
       "name": "design-md",
       "source": "plugins/design-md",
       "description": "対話を通じてプロダクトに合った DESIGN.md を生成する。AIがつくるUIに一貫性を。"
+    },
+    {
+      "name": "search-best-practice",
+      "source": "plugins/search-best-practice",
+      "description": "世の中のベストプラクティスをWeb検索で調査し、鮮度・信頼性・多角的視点を考慮して構造化レポートにまとめる。"
     }
   ]
 }
