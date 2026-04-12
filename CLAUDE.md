@@ -90,6 +90,8 @@ frontmatter の後にスキルの実行手順を Markdown で記述する。
 
 - `CLAUDE.md` — 開発者向け（設計思想、重要ファイル、テスト方法）
 - `README.md` — 利用者向け（後述の「プラグイン README の書き方」に従う）
+- `README.en.md` — README.md の英語版。必ず作成する
+- `README.md` の冒頭に `[English](./README.en.md) | 日本語` の言語スイッチャーを追加する
 - ルートの `CLAUDE.md` のプラグイン一覧にも追加する
 
 ## プラグイン README の書き方
