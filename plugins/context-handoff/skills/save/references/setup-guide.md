@@ -70,27 +70,35 @@ HANDOFF=".context/handoff-${SAFE_BRANCH}.md"
 # ブランチ別ファイルへのシンボリックリンクを更新
 ln -sf "handoff-${SAFE_BRANCH}.md" .context/handoff.md 2>/dev/null
 
+# ファイルの経過時間を人間向けに整形（macOS/Linux 両対応）
+age_of() {
+  local mtime=""
+  if stat --version 2>/dev/null | grep -q GNU; then
+    mtime=$(stat -c %Y "$1" 2>/dev/null)
+  else
+    mtime=$(stat -f %m "$1" 2>/dev/null)
+  fi
+  if [ -z "$mtime" ]; then echo "不明"; return; fi
+  local diff=$(( ($(date +%s) - mtime) / 60 ))
+  if [ $diff -lt 60 ]; then echo "${diff}分前"
+  elif [ $diff -lt 1440 ]; then echo "$((diff/60))時間前"
+  else echo "$((diff/1440))日前"; fi
+}
+
 if [ ! -f "$HANDOFF" ]; then
-  echo "{}"
+  # 現ブランチ用のファイルがない場合は、最新の他ブランチ用ファイルへ誘導する
+  # （ブランチをマージして main に戻った直後などに引き継ぎが途切れるのを防ぐ）
+  LATEST=$(ls -t .context/handoff-*.md 2>/dev/null | head -1)
+  if [ -z "$LATEST" ]; then
+    echo "{}"
+    exit 0
+  fi
+  LATEST_BRANCH=$(grep -m1 "^branch:" "$LATEST" 2>/dev/null | sed 's/^branch: *//;s/"//g')
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"現在のブランチ %s 用の引き継ぎファイルはありませんが、ブランチ %s の引き継ぎ（%sに保存）が %s にあります。読んで3行サマリを表示し、現ブランチに引き継ぐ内容があれば %s として保存してよいか確認してください。"}}' "$BRANCH" "${LATEST_BRANCH:-不明}" "$(age_of "$LATEST")" "$LATEST" "$HANDOFF"
   exit 0
 fi
 
-# 鮮度チェック（macOS/Linux 両対応）
-AGE="不明"
-if command -v stat >/dev/null 2>&1; then
-  if stat --version 2>/dev/null | grep -q GNU; then
-    MTIME=$(stat -c %Y "$HANDOFF" 2>/dev/null)
-  else
-    MTIME=$(stat -f %m "$HANDOFF" 2>/dev/null)
-  fi
-  if [ -n "$MTIME" ]; then
-    NOW=$(date +%s)
-    DIFF=$(( (NOW - MTIME) / 60 ))
-    if [ $DIFF -lt 60 ]; then AGE="${DIFF}分前"
-    elif [ $DIFF -lt 1440 ]; then AGE="$(($DIFF/60))時間前"
-    else AGE="$(($DIFF/1440))日前"; fi
-  fi
-fi
+AGE=$(age_of "$HANDOFF")
 
 # git HEAD の突合
 HEAD=$(grep -m1 "git_head" "$HANDOFF" 2>/dev/null | sed 's/.*: *//;s/"//g;s/ //g')
@@ -191,6 +199,12 @@ rm .context/handoff.md
 BRANCH=$(git branch --show-current | sed 's/[\/:]/-/g')
 ln -sf "handoff-${BRANCH}.md" .context/handoff.md
 ```
+
+### ブランチを切り替えたら引き継ぎが表示されなくなった場合
+
+handoff.md はブランチ別ファイル（`handoff-{branch}.md`）なので、ブランチをマージして main に戻った直後は main 用のファイルが存在しない。
+SessionStart フックは、その場合に最新の他ブランチ用ファイルを案内するので、指示に従って main 用として保存し直せばよい。
+不要になった旧ブランチ用ファイルは `.context/archive/` へ移動する。
 
 ### フックが動作しない場合
 
