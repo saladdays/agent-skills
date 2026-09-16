@@ -40,6 +40,12 @@ L1/L2 は [auto-save-rules.md](references/auto-save-rules.md) で動作する。
 7. セットアップ結果を報告し、リカバリー方法を案内:
    `handoff.md が壊れた場合は削除して /context-handoff:save で再生成できます`
 
+### 既存セットアップの更新（.context/hooks/ が存在する場合）
+
+1. `.context/hooks/session-start.sh` 先頭の `# hook-version:` を [setup-guide.md](references/setup-guide.md) のスクリプトと比較する（行が無ければ旧版）
+2. 古ければ差分を提示し、承認後に setup-guide.md のスクリプトで上書きする。`HANDOFF_SUFFIX` などユーザーが変更した行は引き継ぐ
+3. 更新後は通常の手動保存（L3）へ進む
+
 ### 手動保存（L3）の実行
 
 1. 現在のコンテキストを分析し、保存すべき情報を選別

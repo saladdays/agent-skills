@@ -62,13 +62,22 @@
 ```bash
 #!/bin/bash
 # SessionStart: ブランチ別handoff.mdのリンク + 鮮度チェック + AI指示注入
+# hook-version: 2
+
+# ユーザー別運用（setup-guide.md 方式B）ではここを "-$(whoami)" にする
+HANDOFF_SUFFIX=""
 
 BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 SAFE_BRANCH=$(echo "$BRANCH" | sed 's/[\/:]/-/g')
-HANDOFF=".context/handoff-${SAFE_BRANCH}.md"
+HANDOFF=".context/handoff-${SAFE_BRANCH}${HANDOFF_SUFFIX}.md"
 
 # ブランチ別ファイルへのシンボリックリンクを更新
-ln -sf "handoff-${SAFE_BRANCH}.md" .context/handoff.md 2>/dev/null
+ln -sf "handoff-${SAFE_BRANCH}${HANDOFF_SUFFIX}.md" .context/handoff.md 2>/dev/null
+
+# JSON 文字列に埋め込む値のエスケープ（ブランチ名・パスに " や \ が含まれても壊れないように）
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
 
 # ファイルの経過時間を人間向けに整形（macOS/Linux 両対応）
 age_of() {
@@ -88,13 +97,15 @@ age_of() {
 if [ ! -f "$HANDOFF" ]; then
   # 現ブランチ用のファイルがない場合は、最新の他ブランチ用ファイルへ誘導する
   # （ブランチをマージして main に戻った直後などに引き継ぎが途切れるのを防ぐ）
-  LATEST=$(ls -t .context/handoff-*.md 2>/dev/null | head -1)
+  # HANDOFF_SUFFIX が設定されていれば自分のファイルだけを候補にする（他ユーザーの作業を混入させない）
+  LATEST=$(ls -t .context/handoff-*"${HANDOFF_SUFFIX}".md 2>/dev/null | head -1)
   if [ -z "$LATEST" ]; then
     echo "{}"
     exit 0
   fi
   LATEST_BRANCH=$(grep -m1 "^branch:" "$LATEST" 2>/dev/null | sed 's/^branch: *//;s/"//g')
-  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"現在のブランチ %s 用の引き継ぎファイルはありませんが、ブランチ %s の引き継ぎ（%sに保存）が %s にあります。読んで3行サマリを表示し、現ブランチに引き継ぐ内容があれば %s として保存してよいか確認してください。"}}' "$BRANCH" "${LATEST_BRANCH:-不明}" "$(age_of "$LATEST")" "$LATEST" "$HANDOFF"
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"現在のブランチ %s 用の引き継ぎファイルはありませんが、ブランチ %s の引き継ぎ（%sに保存）が %s にあります。読んで3行サマリを表示し、現ブランチに引き継ぐ内容があれば %s として保存してよいか確認してください。"}}' \
+    "$(json_escape "$BRANCH")" "$(json_escape "${LATEST_BRANCH:-不明}")" "$(age_of "$LATEST")" "$(json_escape "$LATEST")" "$(json_escape "$HANDOFF")"
   exit 0
 fi
 
@@ -109,7 +120,8 @@ if [ -n "$HEAD" ] && [ -n "$CURRENT" ] && [ "$HEAD" != "$CURRENT" ]; then
 fi
 
 # additionalContext で AI に指示を注入
-printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"前回のセッションから引き継ぎ情報があります（%sに保存、ブランチ: %s）。.context/handoff.md を読んで3行サマリを表示し、この認識で合っていますか？と確認してください。%s"}}' "$AGE" "$BRANCH" "$WARN"
+printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"前回のセッションから引き継ぎ情報があります（%sに保存、ブランチ: %s）。.context/handoff.md を読んで3行サマリを表示し、この認識で合っていますか？と確認してください。%s"}}' \
+  "$AGE" "$(json_escape "$BRANCH")" "$WARN"
 ```
 
 #### .context/hooks/pre-compact.sh
@@ -206,6 +218,12 @@ handoff.md はブランチ別ファイル（`handoff-{branch}.md`）なので、
 SessionStart フックは、その場合に最新の他ブランチ用ファイルを案内するので、指示に従って main 用として保存し直せばよい。
 不要になった旧ブランチ用ファイルは `.context/archive/` へ移動する。
 
+### プラグイン更新後もフックの挙動が変わらない場合
+
+フックはプロジェクト内 `.context/hooks/` にコピーされて動くため、プラグインを更新しても自動では差し替わらない。
+`.context/hooks/session-start.sh` 先頭の `# hook-version:` を本ガイドの値と比べ、古ければ本ガイドのスクリプトで上書きする（`HANDOFF_SUFFIX` などのカスタマイズ行は引き継ぐ）。
+`/context-handoff:save` を実行すると、この比較と更新の提案を AI が行う。
+
 ### フックが動作しない場合
 
 `.context/hooks/` のスクリプトに実行権限があるか確認:
@@ -245,6 +263,7 @@ handoff.md は個人のローカル作業メモとして扱う。
 
 handoff.md のファイル名にユーザー名を含める:
 - `.context/handoff-{branch}-{username}.md`
-- SessionStart フックの `SAFE_BRANCH` 行の後に `SAFE_BRANCH="${SAFE_BRANCH}-$(whoami)"` を追加
+- SessionStart フックの `HANDOFF_SUFFIX=""` を `HANDOFF_SUFFIX="-$(whoami)"` に変更
+- 現ブランチ用ファイルが無いときのフォールバック候補も同じ接尾辞のファイルに限定されるため、他メンバーの引き継ぎがセッションに混入しない
 
 この方式なら git 追跡しても他のメンバーとコンフリクトしない。

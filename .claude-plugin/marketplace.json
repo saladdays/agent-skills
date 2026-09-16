@@ -47,7 +47,7 @@
       "name": "context-handoff",
       "source": "./plugins/context-handoff",
       "description": "セッション間のコンテキストを自動で引き継ぐ。保存も再開も意識不要",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "saladdays"
       },
