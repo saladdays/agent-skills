@@ -102,11 +102,44 @@ case "$TARGET" in
     RC=$?
     ;;
   claude)
-    echo "claude 方向は未実装" >&2; exit 1
+    JSON_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-json.XXXXXX")
+    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" claude -p --disallowedTools Edit,Write,Bash --permission-mode dontAsk --output-format json \
+      > "$JSON_FILE" 2> "$STDERR_FILE"
+    RC=$?
+    if [ "$RC" -eq 0 ]; then
+      # result フィールドを取り出す。is_error が true なら失敗扱い。python3 が無ければ生 JSON を保存する
+      if command -v python3 >/dev/null 2>&1; then
+        python3 - "$JSON_FILE" "$OUT" <<'PY'
+import json, sys
+src, dst = sys.argv[1], sys.argv[2]
+try:
+    d = json.load(open(src))
+except Exception as e:
+    sys.stderr.write(f"claude の出力が JSON として読めません: {e}\n"); sys.exit(1)
+if d.get("is_error"):
+    sys.stderr.write(str(d.get("result", "")) + "\n"); sys.exit(1)
+open(dst, "w").write(str(d.get("result", "")))
+PY
+        if [ $? -ne 0 ]; then RC=1; cat "$JSON_FILE" >> "$STDERR_FILE"; fi
+      else
+        echo "python3 が無いため生の JSON を保存します" >&2
+        cp "$JSON_FILE" "$OUT"
+      fi
+    fi
+    rm -f "$JSON_FILE"
     ;;
 esac
 
+if [ "$RC" -eq 124 ]; then
+  echo "$TARGET が ${TIMEOUT} 秒以内に応答しませんでした。ブリーフを小さくするか --timeout を延ばしてください" >&2
+  exit 6
+fi
 if [ "$RC" -ne 0 ]; then
+  if grep -qiE 'not logged in|unauthorized|401|invalid api key|authentication|please run /login|codex login' "$STDERR_FILE"; then
+    echo "$TARGET の認証エラーです。$TARGET でログインしてから再実行してください" >&2
+    tail -5 "$STDERR_FILE" >&2
+    exit 5
+  fi
   echo "$TARGET の実行に失敗しました (rc=$RC)" >&2
   tail -20 "$STDERR_FILE" >&2
   exit 1
