@@ -100,9 +100,12 @@ Copy the contents of `skills/ask/` into Codex's skills directory.
 mkdir -p ~/.agents/skills/second-opinion
 cp -R plugins/second-opinion/skills/ask/. ~/.agents/skills/second-opinion/
 chmod +x ~/.agents/skills/second-opinion/scripts/ask.sh
+sed -i '' 's/^name: ask$/name: second-opinion/' ~/.agents/skills/second-opinion/SKILL.md
 ```
 
-Inside a Codex session, ask for a "second opinion" and it will consult Claude Code.
+The last line renames the skill for Codex. Codex registers skills by the `name` in SKILL.md, not by folder name, so without it the skill would show up as `$ask` (the repository keeps `ask` because Claude Code needs it for `/second-opinion:ask`).
+
+Inside a Codex session, write `$second-opinion` followed by your topic, or just ask for a "second opinion", and it will consult Claude Code.
 
 ### Cursor
 

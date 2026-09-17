@@ -100,9 +100,12 @@ Claude Code の画面で、以下を順番に実行してください。
 mkdir -p ~/.agents/skills/second-opinion
 cp -R plugins/second-opinion/skills/ask/. ~/.agents/skills/second-opinion/
 chmod +x ~/.agents/skills/second-opinion/scripts/ask.sh
+sed -i '' 's/^name: ask$/name: second-opinion/' ~/.agents/skills/second-opinion/SKILL.md
 ```
 
-Codex セッション内で「セカンドオピニオンを聞いて」と伝えると、Claude Code に問い合わせます。
+最後の行は Codex 向けの名前合わせです。Codex はフォルダ名ではなく SKILL.md の `name` でスキルを登録するため、そのままだと `$ask` という名前になります（Claude Code では `/second-opinion:ask` の `ask` が必要なので、リポジトリ側の名前は変えていません）。
+
+Codex セッション内で `$second-opinion` に続けて議題を書くか、「セカンドオピニオンを聞いて」と伝えると、Claude Code に問い合わせます。
 
 ### Cursor
 

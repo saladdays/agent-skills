@@ -225,7 +225,7 @@ critique ラウンドの結果は「### 批判ラウンド」として同じフ�
 ## 9. 配布形態
 
 - Claude Code: マーケットプレイス経由。`skills/ask/scripts/ask.sh` は SKILL.md から相対パス `scripts/ask.sh` で呼ぶ
-- Codex: `~/.agents/skills/second-opinion/` に `skills/ask/` の中身をコピーして使う。README に手順を書く
+- Codex: `~/.agents/skills/second-opinion/` に `skills/ask/` の中身をコピーして使う。Codex はフォルダ名ではなく frontmatter の `name` で登録する（2026-09-17 に実機確認。`name: ask` のままだと `$ask` になる）ので、コピー後に `name: second-opinion` へ書き換える。README に手順を書く
 - Cursor: 初版では起動経路を提供しない（外部 CLI 呼び出しの標準が無い）。README に明記
 
 ## 10. テスト
