@@ -35,10 +35,9 @@ echo "{\"type\":\"result\",\"is_error\":false,\"result\":\"fake claude answer\",
 EOF
 chmod +x "$WORK/bin/codex" "$WORK/bin/claude"
 
-# 偽リポジトリ（本物のリポジトリと同じく .context/ を無視する。既定の --out 保存先が
-# 未追跡ディレクトリとして初回だけ git status に現れ、汚染検出を誤検知するため）
+# 偽リポジトリ
 export FAKE_REPO="$WORK/repo"
-mkdir -p "$FAKE_REPO" && (cd "$FAKE_REPO" && git init -q . && printf '.context/\n' > .gitignore && git add .gitignore && git -c user.email=t@t -c user.name=t commit -q -m init)
+mkdir -p "$FAKE_REPO" && (cd "$FAKE_REPO" && git init -q . && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init)
 printf '## 問い\nどちらの設計が良いか "引用符" と日本語を含む\n' > "$WORK/brief.md"
 
 # run_case NAME EXPECTED_RC "ENV=1 ENV2=x" ARGS...

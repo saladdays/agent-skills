@@ -67,7 +67,6 @@ STAMP=$(date +%Y%m%d-%H%M%S)
 if [ -z "$OUT" ]; then
   OUT="$REPO/.context/second-opinion/answer-$STAMP.md"
 fi
-mkdir -p "$(dirname "$OUT")"
 
 ROLE='あなたは相談役です。リポジトリのファイルは読んでよいが、変更・作成・削除・コマンドによる副作用は行わない。以下のブリーフに対して、独立した見解を根拠付きで述べてください。'
 if [ "$ROUND" = "critique" ]; then
@@ -75,7 +74,11 @@ if [ "$ROUND" = "critique" ]; then
 fi
 PROMPT_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-prompt.XXXXXX")
 STDERR_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-stderr.XXXXXX")
-trap 'rm -f "$PROMPT_FILE" "$STDERR_FILE"' EXIT
+# 回答はまず一時ファイルで受ける。$OUT（既定は <repo>/.context/second-opinion/ 配下）に
+# 直接書くと、その保存先自体を無視していないリポジトリでは相手 CLI の実行前後で
+# git status に自分の出力が差分として現れ、汚染検出が誤発火する。判定後に mv する。
+OUT_TMP=$(mktemp "${TMPDIR:-/tmp}/second-opinion-answer.XXXXXX")
+trap 'rm -f "$PROMPT_FILE" "$STDERR_FILE" "$OUT_TMP"' EXIT
 { printf '%s\n\n' "$ROLE"; cat "$BRIEF"; } > "$PROMPT_FILE"
 
 # タイムアウト付き実行（macOS に timeout コマンドが無いため自前）
@@ -99,7 +102,7 @@ BEFORE=$(git -C "$REPO" status --short 2>/dev/null)
 # 4. 相手 CLI の実行
 case "$TARGET" in
   codex)
-    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" codex exec - --sandbox read-only --ephemeral -C "$REPO" -o "$OUT" \
+    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" codex exec - --sandbox read-only --ephemeral -C "$REPO" -o "$OUT_TMP" \
       > /dev/null 2> "$STDERR_FILE"
     RC=$?
     ;;
@@ -111,7 +114,7 @@ case "$TARGET" in
     if [ "$RC" -eq 0 ]; then
       # result フィールドを取り出す。is_error が true なら失敗扱い。python3 が無ければ生 JSON を保存する
       if command -v python3 >/dev/null 2>&1; then
-        python3 - "$JSON_FILE" "$OUT" <<'PY'
+        python3 - "$JSON_FILE" "$OUT_TMP" <<'PY'
 import json, sys
 src, dst = sys.argv[1], sys.argv[2]
 try:
@@ -125,7 +128,7 @@ PY
         if [ $? -ne 0 ]; then RC=1; cat "$JSON_FILE" >> "$STDERR_FILE"; fi
       else
         echo "python3 が無いため生の JSON を保存します" >&2
-        cp "$JSON_FILE" "$OUT"
+        cp "$JSON_FILE" "$OUT_TMP"
       fi
     fi
     rm -f "$JSON_FILE"
@@ -148,7 +151,10 @@ if [ "$RC" -ne 0 ]; then
 fi
 
 # 5. 作業ツリーの汚染検出（相手は読み取り専用のはず。差があれば警告して 3）
+# 判定対象は相手 CLI の副作用だけにするため、$OUT への移動は判定の後に行う
 AFTER=$(git -C "$REPO" status --short 2>/dev/null)
+mkdir -p "$(dirname "$OUT")"
+mv "$OUT_TMP" "$OUT"
 echo "answer: $OUT" >&2
 cat "$OUT"
 if [ "$BEFORE" != "$AFTER" ]; then
