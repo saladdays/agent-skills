@@ -12,6 +12,7 @@ AI コーディングツール向けのプラグイン集です。Claude Code �
 | [best-practice](./plugins/best-practice/) | 世の中のベストプラクティスを調査し構造化レポートにまとめる | `/best-practice:search` |
 | [roundtable](./plugins/roundtable/) | 多分野の専門家を集めて構造化された議論で多角的な評価・提言 | `/roundtable:start` |
 | [context-handoff](./plugins/context-handoff/) | セッション間のコンテキストを自動で引き継ぐ。保存も再開も意識不要 | `/context-handoff:save` |
+| [second-opinion](./plugins/second-opinion/) | 別系統のモデルに問題だけを渡して独立に解かせ、自分の案と突き合わせる | `/second-opinion:ask` |
 
 ## インストール
 
@@ -28,6 +29,7 @@ AI コーディングツール向けのプラグイン集です。Claude Code �
 /plugin install best-practice@saladdays-skills
 /plugin install roundtable@saladdays-skills
 /plugin install context-handoff@saladdays-skills
+/plugin install second-opinion@saladdays-skills
 ```
 
 ### Cursor

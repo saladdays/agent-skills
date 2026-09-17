@@ -12,6 +12,7 @@ A collection of plugins for AI coding tools. Works with Claude Code and Cursor.
 | [best-practice](./plugins/best-practice/) | Research real-world best practices and compile them into a structured report | `/best-practice:search` |
 | [roundtable](./plugins/roundtable/) | Assemble experts from diverse fields for structured discussion, multi-angle evaluation, and recommendations | `/roundtable:start` |
 | [context-handoff](./plugins/context-handoff/) | Automatically carry context across sessions. No manual saving or resuming required | `/context-handoff:save` |
+| [second-opinion](./plugins/second-opinion/) | Hand only the problem to a model from a different family, get an independent answer, and compare it with your own | `/second-opinion:ask` |
 
 ## Installation
 
@@ -28,6 +29,7 @@ Once the marketplace is added, install the plugins you want.
 /plugin install best-practice@saladdays-skills
 /plugin install roundtable@saladdays-skills
 /plugin install context-handoff@saladdays-skills
+/plugin install second-opinion@saladdays-skills
 ```
 
 ### Cursor

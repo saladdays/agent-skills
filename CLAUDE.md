@@ -171,3 +171,4 @@ SKILL.md をAIツールのスキルディレクトリにコピーしてくださ
 - [best-practice](./plugins/best-practice/) — ベストプラクティスを調査し構造化レポートにまとめる
 - [roundtable](./plugins/roundtable/) — 多分野の専門家を集めて構造化された議論
 - [context-handoff](./plugins/context-handoff/) — セッション間のコンテキストを自動で引き継ぐ
+- [second-opinion](./plugins/second-opinion/) — 別系統のモデルに問題だけを渡して独立に解かせ、自分の案と突き合わせる
