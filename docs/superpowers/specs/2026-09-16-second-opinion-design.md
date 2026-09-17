@@ -129,10 +129,13 @@ Codex はサンドボックス無効時に環境変数を設定しないため�
 | 方向 | コマンド |
 |---|---|
 | Codex へ | `codex exec - --sandbox read-only --ephemeral -C <repo root> -o <out>`。stdin にプロンプト |
-| Claude へ | `claude -p --disallowedTools Edit,Write,Bash --permission-mode dontAsk --output-format json`。stdin にプロンプト。`result` を `<out>` に書く |
+| Claude へ | `claude -p --disallowedTools Edit,Write,NotebookEdit,Bash --permission-mode dontAsk --strict-mcp-config --output-format json`。stdin にプロンプト。`result` を `<out>` に書く |
 
 Claude 側で `--bare` は使わない。`--bare` は OAuth を読まず `ANTHROPIC_API_KEY` が必須になり、
 API キーをグローバルに置かない運用ルールと衝突するため。
+`disallowedTools` に `NotebookEdit` を含める（`Edit`/`Write`/`Bash` だけでは塞がれない書き込み経路のため）。
+`--strict-mcp-config` は settings で許可済みの MCP ツール（外部サービスへの書き込みを含みうる）を
+`--permission-mode dontAsk` のまま動かさないための保険（`--mcp-config` 以外の MCP を無視する）。
 
 **プロンプトの組み立て**
 

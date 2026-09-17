@@ -112,7 +112,7 @@ case "$TARGET" in
     ;;
   claude)
     JSON_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-json.XXXXXX")
-    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" claude -p --disallowedTools Edit,Write,Bash --permission-mode dontAsk --output-format json \
+    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" claude -p --disallowedTools Edit,Write,NotebookEdit,Bash --permission-mode dontAsk --strict-mcp-config --output-format json \
       > "$JSON_FILE" 2> "$STDERR_FILE"
     RC=$?
     if [ "$RC" -eq 0 ]; then

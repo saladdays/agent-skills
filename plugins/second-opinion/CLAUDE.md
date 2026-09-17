@@ -31,7 +31,7 @@ Claude Code からは Codex CLI へ、Codex CLI からは Claude Code へ聞く�
 | 確認日 | 対象 | 使っている仕様 |
 |---|---|---|
 | 2026-09-16 | codex-cli 0.153.4 | `codex exec -`（stdin）、`--sandbox read-only`、`--ephemeral`、`-C`、`-o` |
-| 2026-09-16 | Claude Code 2.1.252 | `claude -p`、`--disallowedTools`、`--permission-mode dontAsk`、`--output-format json`（`result` / `is_error`） |
+| 2026-09-16 | Claude Code 2.1.252 | `claude -p`、`--disallowedTools Edit,Write,NotebookEdit,Bash`、`--permission-mode dontAsk`、`--strict-mcp-config`、`--output-format json`（`result` / `is_error`） |
 | 2026-09-16 | 環境変数 | `CLAUDECODE=1`（Claude Code の子プロセス）、`CODEX_SANDBOX_NETWORK_DISABLED=1` / `CODEX_SANDBOX=seatbelt`（Codex の子プロセス、サンドボックス有効時のみ） |
 
 ask.sh を触るときは、上の表の対象バージョンで `--help` を再確認して更新する。

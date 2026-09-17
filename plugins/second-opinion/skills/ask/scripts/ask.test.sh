@@ -92,8 +92,9 @@ assert_file_contains codex-default-out-path "$WORK/codex-default-out.err" "\.con
 
 run_case claude-ok 0 "CODEX_SANDBOX_NETWORK_DISABLED=1" --brief "$WORK/brief.md" --out "$WORK/claude-ok.answer.md"
 assert_file_contains claude-ok-answer "$WORK/claude-ok.answer.md" "fake claude answer"
-assert_file_contains claude-ok-disallow "$WORK/claude-ok.log" "Edit,Write,Bash"
+assert_file_contains claude-ok-disallow "$WORK/claude-ok.log" "Edit,Write,NotebookEdit,Bash"
 assert_file_contains claude-ok-dontask "$WORK/claude-ok.log" "dontAsk"
+assert_file_contains claude-ok-strict-mcp "$WORK/claude-ok.log" "strict-mcp-config"
 assert_file_contains claude-ok-json "$WORK/claude-ok.log" "json"
 if grep -q -- "--bare" "$WORK/claude-ok.log"; then FAIL=$((FAIL+1)); echo "FAIL  claude-ok-nobare: --bare must not be used"; else PASS=$((PASS+1)); echo "pass  claude-ok-nobare"; fi
 run_case codex-auth 5 "CLAUDECODE=1 FAKE_MODE=auth" --brief "$WORK/brief.md" --out "$WORK/codex-auth.answer.md"
