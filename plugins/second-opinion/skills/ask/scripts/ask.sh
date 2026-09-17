@@ -94,6 +94,8 @@ run_with_timeout() {
   return $rc
 }
 
+BEFORE=$(git -C "$REPO" status --short 2>/dev/null)
+
 # 4. 相手 CLI の実行
 case "$TARGET" in
   codex)
@@ -145,6 +147,13 @@ if [ "$RC" -ne 0 ]; then
   exit 1
 fi
 
+# 5. 作業ツリーの汚染検出（相手は読み取り専用のはず。差があれば警告して 3）
+AFTER=$(git -C "$REPO" status --short 2>/dev/null)
 echo "answer: $OUT" >&2
 cat "$OUT"
+if [ "$BEFORE" != "$AFTER" ]; then
+  echo "警告: 相手 CLI の実行中に作業ツリーが変更されました。git status で確認してください" >&2
+  diff <(printf '%s\n' "$BEFORE") <(printf '%s\n' "$AFTER") >&2
+  exit 3
+fi
 exit 0

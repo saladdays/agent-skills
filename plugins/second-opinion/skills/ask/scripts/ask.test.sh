@@ -35,9 +35,10 @@ echo "{\"type\":\"result\",\"is_error\":false,\"result\":\"fake claude answer\",
 EOF
 chmod +x "$WORK/bin/codex" "$WORK/bin/claude"
 
-# 偽リポジトリ
+# 偽リポジトリ（本物のリポジトリと同じく .context/ を無視する。既定の --out 保存先が
+# 未追跡ディレクトリとして初回だけ git status に現れ、汚染検出を誤検知するため）
 export FAKE_REPO="$WORK/repo"
-mkdir -p "$FAKE_REPO" && (cd "$FAKE_REPO" && git init -q . && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init)
+mkdir -p "$FAKE_REPO" && (cd "$FAKE_REPO" && git init -q . && printf '.context/\n' > .gitignore && git add .gitignore && git -c user.email=t@t -c user.name=t commit -q -m init)
 printf '## 問い\nどちらの設計が良いか "引用符" と日本語を含む\n' > "$WORK/brief.md"
 
 # run_case NAME EXPECTED_RC "ENV=1 ENV2=x" ARGS...
@@ -96,6 +97,11 @@ run_case claude-auth 5 "CODEX_SANDBOX_NETWORK_DISABLED=1 FAKE_MODE=auth" --brief
 run_case codex-timeout 6 "CLAUDECODE=1 FAKE_MODE=hang" --brief "$WORK/brief.md" --timeout 2 --out "$WORK/codex-timeout.answer.md"
 run_case codex-fail 1 "CLAUDECODE=1 FAKE_MODE=fail" --brief "$WORK/brief.md" --out "$WORK/codex-fail.answer.md"
 assert_file_contains codex-fail-stderr "$WORK/codex-fail.err" "boom"
+
+run_case codex-dirty 3 "CLAUDECODE=1 FAKE_MODE=dirty" --brief "$WORK/brief.md" --out "$WORK/codex-dirty.answer.md"
+assert_file_contains codex-dirty-warn "$WORK/codex-dirty.err" "作業ツリー"
+assert_file_contains codex-dirty-answer-kept "$WORK/codex-dirty.answer.md" "fake codex answer"
+rm -f "$FAKE_REPO/dirty.txt"
 
 echo; echo "passed=$PASS failed=$FAIL"
 [ "$FAIL" -eq 0 ]
