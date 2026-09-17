@@ -54,6 +54,18 @@
       "license": "MIT",
       "keywords": ["context", "session", "handoff", "memory", "persistence"],
       "category": "productivity"
+    },
+    {
+      "name": "second-opinion",
+      "source": "./plugins/second-opinion",
+      "description": "別系統のモデルに問題だけを渡して独立に解かせ、自分の案と突き合わせる",
+      "version": "1.0.0",
+      "author": {
+        "name": "saladdays"
+      },
+      "license": "MIT",
+      "keywords": ["second-opinion", "cross-model", "bias", "review", "codex", "claude-code"],
+      "category": "review"
     }
   ]
 }

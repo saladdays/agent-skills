@@ -27,6 +27,11 @@
       "source": "plugins/context-handoff",
       "description": "セッション間のコンテキストを自動で引き継ぐ。保存も再開も意識不要。",
       "logo": "plugins/context-handoff/assets/logo.png"
+    },
+    {
+      "name": "second-opinion",
+      "source": "plugins/second-opinion",
+      "description": "別系統のモデルに問題だけを渡して独立に解かせ、自分の案と突き合わせる。単一モデルの偏りを自覚した上で判断できる。"
     }
   ]
 }

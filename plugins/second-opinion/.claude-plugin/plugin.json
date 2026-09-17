@@ -1,0 +1,10 @@
+{
+  "name": "second-opinion",
+  "description": "別系統のモデルに問題だけを渡して独立に解かせ、自分の案と突き合わせる。単一モデルの偏りを自覚した上で判断できる。",
+  "version": "1.0.0",
+  "author": {
+    "name": "saladdays"
+  },
+  "license": "MIT",
+  "skills": "./skills/"
+}
