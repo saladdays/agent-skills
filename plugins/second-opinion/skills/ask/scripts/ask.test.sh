@@ -27,7 +27,7 @@ cat > "$WORK/bin/claude" <<'EOF'
 #!/bin/bash
 printf '%s\n' "$@" > "$FAKE_LOG"
 case "${FAKE_MODE:-ok}" in
-  auth) echo '{"type":"result","is_error":true,"result":"Not logged in. Please run /login"}'; exit 0;;
+  auth) echo '{"type":"result","is_error":true,"result":"Failed to authenticate: OAuth session expired and could not be refreshed"}'; exit 0;;
   hang) sleep 30; exit 0;;
   dirty) echo "contaminated" > "$FAKE_REPO/dirty.txt";;
   fail) echo "boom" >&2; exit 1;;

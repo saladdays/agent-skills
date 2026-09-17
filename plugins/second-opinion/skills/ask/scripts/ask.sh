@@ -149,7 +149,8 @@ if [ "$RC" -eq 124 ]; then
   exit 6
 fi
 if [ "$RC" -ne 0 ]; then
-  if grep -qiE 'not logged in|unauthorized|401|invalid api key|authentication|please run /login|codex login' "$STDERR_FILE"; then
+  # 実例: Claude Code は "Failed to authenticate: OAuth session expired and could not be refreshed" を返す
+  if grep -qiE 'not logged in|unauthorized|401|invalid api key|authenticat|oauth|please run /login|codex login' "$STDERR_FILE"; then
     echo "$TARGET の認証エラーです。$TARGET でログインしてから再実行してください" >&2
     tail -5 "$STDERR_FILE" >&2
     exit 5
