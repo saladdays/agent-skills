@@ -72,5 +72,18 @@ chmod -x "$WORK/bin/codex"
 run_case cli-missing 4 "CLAUDECODE=1" --brief "$WORK/brief.md"
 chmod +x "$WORK/bin/codex"
 
+run_case codex-ok 0 "CLAUDECODE=1" --brief "$WORK/brief.md" --out "$WORK/codex-ok.answer.md"
+assert_file_contains codex-ok-answer "$WORK/codex-ok.answer.md" "fake codex answer"
+assert_file_contains codex-ok-stdout "$WORK/codex-ok.out" "fake codex answer"
+assert_file_contains codex-ok-role "$WORK/codex-ok.answer.md" "あなたは相談役です"
+assert_file_contains codex-ok-brief "$WORK/codex-ok.answer.md" '"引用符"'
+assert_file_contains codex-ok-sandbox "$WORK/codex-ok.log" "read-only"
+assert_file_contains codex-ok-ephemeral "$WORK/codex-ok.log" "ephemeral"
+assert_file_contains codex-ok-cd "$WORK/codex-ok.log" "$FAKE_REPO"
+run_case codex-critique 0 "CLAUDECODE=1" --brief "$WORK/brief.md" --round critique --out "$WORK/codex-critique.answer.md"
+assert_file_contains codex-critique-role "$WORK/codex-critique.answer.md" "弱点を最低 3 つ"
+run_case codex-default-out 0 "CLAUDECODE=1" --brief "$WORK/brief.md"
+assert_file_contains codex-default-out-path "$WORK/codex-default-out.err" "\.context/second-opinion/answer-"
+
 echo; echo "passed=$PASS failed=$FAIL"
 [ "$FAIL" -eq 0 ]

@@ -60,4 +60,58 @@ if [ -z "$TARGET_BIN" ] || [ ! -x "$TARGET_BIN" ]; then
 fi
 
 echo "from=$FROM target=$TARGET round=$ROUND" >&2
+
+# 3. 保存先とプロンプト
+REPO=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+STAMP=$(date +%Y%m%d-%H%M%S)
+if [ -z "$OUT" ]; then
+  OUT="$REPO/.context/second-opinion/answer-$STAMP.md"
+fi
+mkdir -p "$(dirname "$OUT")"
+
+ROLE='あなたは相談役です。リポジトリのファイルは読んでよいが、変更・作成・削除・コマンドによる副作用は行わない。以下のブリーフに対して、独立した見解を根拠付きで述べてください。'
+if [ "$ROUND" = "critique" ]; then
+  ROLE="$ROLE 提示された案の弱点を最低 3 つ、代替案を最低 1 つ挙げてください。"
+fi
+PROMPT_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-prompt.XXXXXX")
+STDERR_FILE=$(mktemp "${TMPDIR:-/tmp}/second-opinion-stderr.XXXXXX")
+trap 'rm -f "$PROMPT_FILE" "$STDERR_FILE"' EXIT
+{ printf '%s\n\n' "$ROLE"; cat "$BRIEF"; } > "$PROMPT_FILE"
+
+# タイムアウト付き実行（macOS に timeout コマンドが無いため自前）
+# 使い方: run_with_timeout <秒> <入力ファイル> <コマンド...>
+# 背景実行は非対話 bash で stdin が /dev/null になりうるため、関数内で明示的にリダイレクトする
+run_with_timeout() {
+  local secs="$1" infile="$2"; shift 2
+  local flag; flag=$(mktemp "${TMPDIR:-/tmp}/second-opinion-timeout.XXXXXX"); rm -f "$flag"
+  "$@" < "$infile" &
+  local pid=$!
+  ( sleep "$secs"; touch "$flag"; kill -TERM "$pid" 2>/dev/null ) &
+  local wd=$!
+  wait "$pid"; local rc=$?
+  kill "$wd" 2>/dev/null; wait "$wd" 2>/dev/null
+  if [ -f "$flag" ]; then rm -f "$flag"; return 124; fi
+  return $rc
+}
+
+# 4. 相手 CLI の実行
+case "$TARGET" in
+  codex)
+    run_with_timeout "$TIMEOUT" "$PROMPT_FILE" codex exec - --sandbox read-only --ephemeral -C "$REPO" -o "$OUT" \
+      > /dev/null 2> "$STDERR_FILE"
+    RC=$?
+    ;;
+  claude)
+    echo "claude 方向は未実装" >&2; exit 1
+    ;;
+esac
+
+if [ "$RC" -ne 0 ]; then
+  echo "$TARGET の実行に失敗しました (rc=$RC)" >&2
+  tail -20 "$STDERR_FILE" >&2
+  exit 1
+fi
+
+echo "answer: $OUT" >&2
+cat "$OUT"
 exit 0
