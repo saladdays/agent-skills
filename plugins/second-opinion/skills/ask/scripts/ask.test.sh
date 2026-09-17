@@ -5,6 +5,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ASK="$HERE/ask.sh"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/ask-test.XXXXXX")
+trap '[ "${KEEP_WORK:-}" = "1" ] || rm -rf "$WORK"' EXIT
 PASS=0; FAIL=0
 
 # 偽 CLI: 引数を記録し、モードに応じて振る舞う
@@ -17,6 +18,7 @@ case "${FAKE_MODE:-ok}" in
   hang) sleep 30; exit 0;;
   dirty) echo "contaminated" > "$FAKE_REPO/dirty.txt";;
   fail) echo "boom" >&2; exit 1;;
+  empty) OUT=""; while [ $# -gt 0 ]; do [ "$1" = "-o" ] && OUT="$2"; shift; done; : > "$OUT"; exit 0;;
 esac
 OUT=""; while [ $# -gt 0 ]; do [ "$1" = "-o" ] && OUT="$2"; shift; done
 { echo "fake codex answer"; echo "--- prompt received ---"; cat; } > "$OUT"
@@ -29,6 +31,7 @@ case "${FAKE_MODE:-ok}" in
   hang) sleep 30; exit 0;;
   dirty) echo "contaminated" > "$FAKE_REPO/dirty.txt";;
   fail) echo "boom" >&2; exit 1;;
+  empty) echo '{"type":"result","is_error":false,"result":""}'; exit 0;;
 esac
 PROMPT=$(cat | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')
 echo "{\"type\":\"result\",\"is_error\":false,\"result\":\"fake claude answer\",\"prompt_echo\":$PROMPT}"
@@ -59,6 +62,8 @@ assert_file_contains() {  # NAME FILE PATTERN
 # --- ケース ---
 run_case no-brief 1 "" --from claude
 run_case bad-round 1 "" --brief "$WORK/brief.md" --from claude --round wrong
+run_case brief-no-value 1 "" --brief
+run_case out-no-value 1 "CLAUDECODE=1" --brief "$WORK/brief.md" --out
 run_case undetectable 2 "" --brief "$WORK/brief.md"
 run_case detect-claude 0 "CLAUDECODE=1" --brief "$WORK/brief.md"
 assert_file_contains detect-claude-target "$WORK/detect-claude.err" "target=codex"
@@ -101,6 +106,16 @@ run_case codex-dirty 3 "CLAUDECODE=1 FAKE_MODE=dirty" --brief "$WORK/brief.md" -
 assert_file_contains codex-dirty-warn "$WORK/codex-dirty.err" "作業ツリー"
 assert_file_contains codex-dirty-answer-kept "$WORK/codex-dirty.answer.md" "fake codex answer"
 rm -f "$FAKE_REPO/dirty.txt"
+
+run_case claude-dirty 3 "CODEX_SANDBOX_NETWORK_DISABLED=1 FAKE_MODE=dirty" --brief "$WORK/brief.md" --out "$WORK/claude-dirty.answer.md"
+assert_file_contains claude-dirty-warn "$WORK/claude-dirty.err" "作業ツリー"
+assert_file_contains claude-dirty-answer-kept "$WORK/claude-dirty.answer.md" "fake claude answer"
+rm -f "$FAKE_REPO/dirty.txt"
+
+run_case codex-empty 1 "CLAUDECODE=1 FAKE_MODE=empty" --brief "$WORK/brief.md" --out "$WORK/codex-empty.answer.md"
+assert_file_contains codex-empty-msg "$WORK/codex-empty.err" "回答が空でした"
+run_case claude-empty 1 "CODEX_SANDBOX_NETWORK_DISABLED=1 FAKE_MODE=empty" --brief "$WORK/brief.md" --out "$WORK/claude-empty.answer.md"
+assert_file_contains claude-empty-msg "$WORK/claude-empty.err" "回答が空でした"
 
 echo; echo "passed=$PASS failed=$FAIL"
 [ "$FAIL" -eq 0 ]

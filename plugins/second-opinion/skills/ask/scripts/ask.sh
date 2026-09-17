@@ -16,14 +16,18 @@ Exit codes: 0 成功 / 1 その他 / 2 判定不能 / 3 作業ツリー変更 / 
 EOF
 }
 
+need_val() {  # $1=フラグ名 $2=残り引数の数
+  if [ "$2" -lt 2 ]; then echo "$1 に値がありません" >&2; usage; exit 1; fi
+}
+
 BRIEF=""; FROM=""; ROUND="independent"; OUT=""; TIMEOUT=600
 while [ $# -gt 0 ]; do
   case "$1" in
-    --brief)   BRIEF="${2:-}"; shift 2 ;;
-    --from)    FROM="${2:-}"; shift 2 ;;
-    --round)   ROUND="${2:-}"; shift 2 ;;
-    --out)     OUT="${2:-}"; shift 2 ;;
-    --timeout) TIMEOUT="${2:-}"; shift 2 ;;
+    --brief)   need_val "$1" $#; BRIEF="$2"; shift 2 ;;
+    --from)    need_val "$1" $#; FROM="$2"; shift 2 ;;
+    --round)   need_val "$1" $#; ROUND="$2"; shift 2 ;;
+    --out)     need_val "$1" $#; OUT="$2"; shift 2 ;;
+    --timeout) need_val "$1" $#; TIMEOUT="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage; exit 1 ;;
   esac
@@ -89,10 +93,10 @@ run_with_timeout() {
   local flag; flag=$(mktemp "${TMPDIR:-/tmp}/second-opinion-timeout.XXXXXX"); rm -f "$flag"
   "$@" < "$infile" &
   local pid=$!
-  ( sleep "$secs"; touch "$flag"; kill -TERM "$pid" 2>/dev/null ) &
+  ( sleep "$secs" && { touch "$flag"; kill -TERM "$pid" 2>/dev/null; sleep 2; kill -KILL "$pid" 2>/dev/null; } ) &
   local wd=$!
   wait "$pid"; local rc=$?
-  kill "$wd" 2>/dev/null; wait "$wd" 2>/dev/null
+  pkill -P "$wd" 2>/dev/null; kill "$wd" 2>/dev/null; wait "$wd" 2>/dev/null
   if [ -f "$flag" ]; then rm -f "$flag"; return 124; fi
   return $rc
 }
@@ -125,12 +129,13 @@ if d.get("is_error"):
     sys.stderr.write(str(d.get("result", "")) + "\n"); sys.exit(1)
 open(dst, "w").write(str(d.get("result", "")))
 PY
-        if [ $? -ne 0 ]; then RC=1; cat "$JSON_FILE" >> "$STDERR_FILE"; fi
+        if [ $? -ne 0 ]; then RC=1; fi
       else
         echo "python3 が無いため生の JSON を保存します" >&2
         cp "$JSON_FILE" "$OUT_TMP"
       fi
     fi
+    if [ "$RC" -ne 0 ] && [ -s "$JSON_FILE" ]; then cat "$JSON_FILE" >> "$STDERR_FILE"; fi
     rm -f "$JSON_FILE"
     ;;
 esac
@@ -150,11 +155,17 @@ if [ "$RC" -ne 0 ]; then
   exit 1
 fi
 
+if [ ! -s "$OUT_TMP" ]; then
+  echo "$TARGET の回答が空でした" >&2
+  tail -20 "$STDERR_FILE" >&2
+  exit 1
+fi
+
 # 5. 作業ツリーの汚染検出（相手は読み取り専用のはず。差があれば警告して 3）
 # 判定対象は相手 CLI の副作用だけにするため、$OUT への移動は判定の後に行う
 AFTER=$(git -C "$REPO" status --short 2>/dev/null)
 mkdir -p "$(dirname "$OUT")"
-mv "$OUT_TMP" "$OUT"
+mv "$OUT_TMP" "$OUT" || { echo "回答の保存に失敗しました: $OUT" >&2; exit 1; }
 echo "answer: $OUT" >&2
 cat "$OUT"
 if [ "$BEFORE" != "$AFTER" ]; then
