@@ -35,8 +35,9 @@ argument-hint: "[議題（省略可。省略時は直近の判断を対象にす
 
 1. 会話から「問い・制約・成功条件・起きた事実・関連ファイル」を抜き出す
 2. [brief-format.md](references/brief-format.md) のテンプレートで `.context/second-opinion/brief-<YYYYMMDD-HHMMSS>.md` に書く
-3. brief-format.md の自己検証を行う。自分の案・仮説・解釈が混ざっていたら書き直す
-4. ユーザーに 3 行で見せて承認を取る:
+3. 自分の現時点の案と理由を `.context/second-opinion/own-<同じ timestamp>.md` に書く。相手には渡さない。案が無い場合は「未定」と書く
+4. brief-format.md の自己検証を行う。自分の案・仮説・解釈が混ざっていたら書き直す
+5. ユーザーに 3 行で見せて承認を取る:
    「別モデルに以下を聞きます。自分の案は渡していません。
    - 問い: 〜
    - 制約/成功条件: 〜
@@ -45,7 +46,7 @@ argument-hint: "[議題（省略可。省略時は直近の判断を対象にす
 
 ### Phase 1: 独立回答
 
-`scripts/ask.sh --brief <ブリーフのパス>` を実行する。stdout が相手の回答、stderr の `answer:` 行が保存先。
+`scripts/ask.sh --brief <ブリーフのパス>`（SKILL.md のあるディレクトリ基準。プラグインとしてインストールされている場合はプラグインの `skills/ask/scripts/ask.sh`）を実行する。stdout が相手の回答、stderr の `answer:` 行が保存先。
 
 終了コードごとの対応:
 
@@ -63,7 +64,7 @@ argument-hint: "[議題（省略可。省略時は直近の判断を対象にす
 
 [output-format.md](references/output-format.md) の表を作る。
 
-- 「自分」列は Phase 0 の時点で持っていた案。相手を見て変えない
+- 「自分」列は own ファイルから転記する。相手の回答を見て書き換えない
 - 相手の原文は全文併記。要約しない
 - 相違点で自分の側に寄せる表現をしない
 - 表の下の定型 2 行（人間が決める / 一致は検証済みではない）を必ず付ける
