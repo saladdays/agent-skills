@@ -124,6 +124,9 @@ ask.sh --brief <path> [--from claude|codex] [--round independent|critique] [--ou
 4. どれも無ければ終了コード 2。「実行環境を判定できません。--from を指定してください」
 
 Codex はサンドボックス無効時に環境変数を設定しないため、3 だけに頼らない。
+`CODEX_SANDBOX_NETWORK_DISABLED=1` は「ネットワークが遮断されている」ときに立つ変数で、これが立った状態で
+Claude 側（API 通信が要る）へ聞くと失敗しやすい。ask.sh は判定ロジックは変えずに stderr へ 1 行注意を出す。
+失敗する場合はネットワーク許可（昇格）で再実行し、`--from codex` を付ける。
 
 **呼び出し**
 

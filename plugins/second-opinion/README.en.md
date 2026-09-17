@@ -69,6 +69,8 @@ The same principle works in human meetings: don't state your proposal before ask
 - From Claude Code: [Codex CLI](https://developers.openai.com/codex/cli) installed and logged in
 - From Codex: [Claude Code](https://code.claude.com/docs) installed and logged in
 - Usage of the other model is billed on that side's plan or API
+- From Codex, the sandbox needs network permission (an escalation approval), since the Claude side needs API access
+- If `ANTHROPIC_API_KEY` is set in the environment, the Claude side is billed via the API instead of OAuth
 
 ## Installation
 

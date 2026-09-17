@@ -69,6 +69,8 @@ LLM は、自分の生成したものを他より高く評価する傾向（自�
 - Claude Code から使う場合: [Codex CLI](https://developers.openai.com/codex/cli) がインストール・ログイン済み
 - Codex から使う場合: [Claude Code](https://code.claude.com/docs) がインストール・ログイン済み
 - 相手モデルの利用料は相手側のプラン・API で発生します
+- Codex から使う場合、サンドボックスのネットワーク許可（昇格承認）が必要です（Claude 側は API 通信が要るため）
+- 環境に `ANTHROPIC_API_KEY` があると、Claude 側は OAuth ではなく API 課金で呼ばれます
 
 ## インストール
 

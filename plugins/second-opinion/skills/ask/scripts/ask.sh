@@ -56,6 +56,10 @@ case "$FROM" in
   *) echo "--from は claude か codex: '$FROM'" >&2; exit 1 ;;
 esac
 
+if [ "${CODEX_SANDBOX_NETWORK_DISABLED:-}" = "1" ]; then
+  echo "注意: Codex サンドボックスがネットワークを遮断しています。失敗する場合はネットワーク許可（昇格）で再実行し、--from codex を付けてください" >&2
+fi
+
 # 2. 相手 CLI の存在確認（実行権限の無いファイルは「見つからない」扱い）
 TARGET_BIN=$(command -v "$TARGET" 2>/dev/null)
 if [ -z "$TARGET_BIN" ] || [ ! -x "$TARGET_BIN" ]; then

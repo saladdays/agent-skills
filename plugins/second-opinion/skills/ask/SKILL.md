@@ -48,6 +48,8 @@ argument-hint: "[議題（省略可。省略時は直近の判断を対象にす
 
 `scripts/ask.sh --brief <ブリーフのパス>`（SKILL.md のあるディレクトリ基準。プラグインとしてインストールされている場合はプラグインの `skills/ask/scripts/ask.sh`）を実行する。stdout が相手の回答、stderr の `answer:` 行が保存先。
 
+実行時は呼び出し元を常に明示する。Claude Code から使っているなら `--from claude`、Codex から使っているなら `--from codex`。環境変数による自動判定は補助であり、頼り切らない。
+
 終了コードごとの対応:
 
 | コード | ユーザーに返す文 |
